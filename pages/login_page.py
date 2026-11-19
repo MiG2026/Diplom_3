@@ -4,7 +4,6 @@ from data import TestWaitTime as TWTime
 from urls import Url
 import allure
 
-
 class LoginPage(BasePage):
 
     @allure.step('Открываем страницу авторизации')

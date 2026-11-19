@@ -4,8 +4,6 @@ from locators.feed_page_locators import FeedPageLocators as FPLocs
 from data import TestWaitTime as TWTime
 from urls import Url
 import allure
-from selenium.webdriver.support.ui import WebDriverWait
-
 
 class FeedPage(BasePage):
 
@@ -17,7 +15,7 @@ class FeedPage(BasePage):
     def wait_load_feed_page(self, wait_time=TWTime.page):
         self.wait_for_visibility_element(FPLocs.feed_page_header, wait_time)
 
-    @allure.step('Открываем главную страницу и ожидаем её загрузки')
+    @allure.step('Открываем страницу "Лента Заказов" и ожидаем её загрузки')
     def wait_open_and_load_feed_page(self, wait_time=TWTime.page):
         self.open_feed_page()
         self.wait_load_feed_page(wait_time)
@@ -49,17 +47,17 @@ class FeedPage(BasePage):
 
     @allure.step('Получаем список ID заказов в разделе «В работе»')
     def get_order_ids_in_work(self):
-        elements = self.driver.find_elements(*FPLocs.section_in_work)
+        elements = self.get_elements(FPLocs.section_in_work)
         return [
-        self._normalize_order_id(el.text)
-        for el in elements
-        if el.text.strip()
-        ]
+            self._normalize_order_id(el.text)
+            for el in elements
+            if el.text.strip()]
 
     @allure.step('Ждём появления заказа {expected_id} в разделе «В работе»')
     def wait_order_appears_in_work(self, expected_id, timeout=20):
         expected_norm = self._normalize_order_id(expected_id)
+
         def _check(driver):
-            ids = self.get_order_ids_in_work()
-            return expected_norm in ids
-        return WebDriverWait(self.driver, timeout).until(_check)
+            return expected_norm in self.get_order_ids_in_work()
+
+        return self.wait_for_condition(_check, timeout)

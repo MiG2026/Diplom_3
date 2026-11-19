@@ -4,9 +4,6 @@ from locators.main_page_locators import MainPageLocators as MPLocs
 from data import TestWaitTime as TWTime
 from urls import Url
 import allure
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-
 
 class MainPage(BasePage):
 
@@ -51,15 +48,13 @@ class MainPage(BasePage):
 
     @allure.step('Добавляем ингредиент в заказ')
     def add_ingredient_to_order(self):
-        WebDriverWait(self.driver, 10).until(
-            EC.visibility_of_element_located(MPLocs.ingredient)
-        )
+        self.wait_for_visibility_element(MPLocs.ingredient, 10)
         self.drag_and_drop_element(MPLocs.ingredient, MPLocs.burger_constructor)
 
     @allure.step('Получаем значение счётчика ингредиента')
     def get_ingredient_counter(self):
-        ('Возвращает значение счётчика ингредиента (0, если счётчик скрыт/отсутствует)')
-        counters = self.driver.find_elements(*MPLocs.counter_ingredient)
+        """Возвращает значение счётчика ингредиента (0, если счётчик скрыт или отсутствует)."""
+        counters = self.get_elements(MPLocs.counter_ingredient)
         if not counters:
             return 0
         counter = counters[0]
@@ -70,8 +65,10 @@ class MainPage(BasePage):
 
     @allure.step('Ждём, что счётчик ингредиента станет равен {expected}')
     def wait_counter_ingredient_equals(self, expected, timeout=10):
-        return WebDriverWait(self.driver, timeout).until(lambda d: self.get_ingredient_counter() == expected,
-            message=f"Счётчик ингредиента не стал равен {expected}",)
+        return self.wait_for_condition(
+            lambda d: self.get_ingredient_counter() == expected,
+            timeout,
+            message=f'Счётчик ингредиента не стал равен {expected}')
 
     @allure.step('Нажимаем на кнопку "Оформить заказ"')
     def click_button_create_order(self):
@@ -97,14 +94,13 @@ class MainPage(BasePage):
 
     @allure.step('Добавляем соус в заказ')
     def add_sauce_to_order(self):
-        WebDriverWait(self.driver, 10).until(
-            EC.visibility_of_element_located(MPLocs.sauce_spicy)
-        )
+        self.wait_for_visibility_element(MPLocs.sauce_spicy, 10)
         self.drag_and_drop_element(MPLocs.sauce_spicy, MPLocs.burger_constructor)
 
     @allure.step('Получаем значение счётчика соуса')
     def get_sauce_counter(self):
-        counters = self.driver.find_elements(*MPLocs.counter_sauce_spicy)
+        """Возвращает значение счётчика соуса (0, если счётчик скрыт или отсутствует)."""
+        counters = self.get_elements(MPLocs.counter_sauce_spicy)
         if not counters:
             return 0
         text = (counters[0].get_attribute('textContent') or '').strip()
@@ -112,6 +108,7 @@ class MainPage(BasePage):
 
     @allure.step('Ждём, что счётчик соуса станет равен {expected}')
     def wait_sauce_counter_equals(self, expected, timeout=10):
-        return WebDriverWait(self.driver, timeout).until(
+        return self.wait_for_condition(
             lambda d: self.get_sauce_counter() == expected,
-            message=f"Счётчик соуса не стал равен {expected}",)
+            timeout,
+            message=f'Счётчик соуса не стал равен {expected}')

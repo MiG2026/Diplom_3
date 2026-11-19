@@ -4,7 +4,6 @@ from seletools.actions import drag_and_drop
 from data import TestWaitTime as TWTime
 import allure
 
-
 class BasePage():
 
     def __init__(self, driver):
@@ -17,7 +16,15 @@ class BasePage():
     @allure.step('Получаем URL страницы')
     def get_page_url(self):
         return self.driver.current_url
-    
+
+    @allure.step('Ищем все элементы по локатору')
+    def get_elements(self, element):
+        return self.driver.find_elements(*element)
+
+    @allure.step('Ожидаем выполнение условия до {wait_time} секунд')
+    def wait_for_condition(self, condition, wait_time, message=''):
+        return WebDriverWait(self.driver, wait_time).until(condition, message=message)
+
     @allure.step('Ожидаем видимости элемента страницы')
     def wait_for_visibility_element(self, element, wait_time=TWTime.visible):
         WebDriverWait(self.driver, wait_time).until(EC.visibility_of_element_located(element))
@@ -26,10 +33,10 @@ class BasePage():
     def check_element_is_displayed(self, element, wait_time=TWTime.visible):
         wait_element = WebDriverWait(self.driver, wait_time).until(EC.visibility_of_element_located(element))
         return wait_element.is_displayed()
-    
+
     @allure.step('Ожидаем исчезновение элемента страницы с экрана')
     def check_element_not_is_displayed(self, element, wait_time=TWTime.invisible):
-        return WebDriverWait(self.driver, wait_time).until(EC.invisibility_of_element_located(element))    
+        return WebDriverWait(self.driver, wait_time).until(EC.invisibility_of_element_located(element))
 
     @allure.step('Нажимаем на элемент страницы')
     def click_on_element(self, element):
@@ -48,5 +55,4 @@ class BasePage():
     def drag_and_drop_element(self, draggable_element, place_element):
         source = self.driver.find_element(*draggable_element)
         target = self.driver.find_element(*place_element)
-
         drag_and_drop(self.driver, source, target)
